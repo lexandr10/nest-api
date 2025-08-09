@@ -7,10 +7,10 @@ import {
 import * as bcrypt from 'bcryptjs'
 
 import { PrismaService } from 'src/prisma/prisma.service'
-import { RegisterRequest } from './dto/register.dto'
+import { RegisterInput } from 'src/inputs/register.input'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
-import { LoginRequest } from './dto/login.dto'
+import { LoginInput } from 'src/inputs/login.input'
 import type { Request, Response } from 'express'
 import { isDev } from 'src/utils/is-dev.util'
 
@@ -35,8 +35,8 @@ export class AuthService {
 		this.COOKIE_DOMAIN = configService.getOrThrow<string>('COOKIE_DOMAIN')
 	}
 
-	async register(res: Response, dto: RegisterRequest) {
-		const { name, email, password } = dto
+	async register(res: Response, input: RegisterInput) {
+		const { name, email, password } = input
 
 		const existUser = await this.prismaService.user.findUnique({
 			where: {
@@ -61,8 +61,8 @@ export class AuthService {
 		return this.auth(res, user.id)
 	}
 
-	async login(res: Response, dto: LoginRequest) {
-		const { email, password } = dto
+	async login(res: Response, input: LoginInput) {
+		const { email, password } = input
 
 		const user = await this.prismaService.user.findUnique({
 			where: {
@@ -162,7 +162,7 @@ export class AuthService {
 			domain: this.COOKIE_DOMAIN,
 			expires,
 			secure: !isDev(this.configService),
-			sameSite: isDev(this.configService) ? 'none' : 'lax'
+			sameSite: !isDev(this.configService) ? 'none' : 'lax'
 		})
 	}
 }

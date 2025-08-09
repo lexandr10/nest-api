@@ -17,7 +17,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 			algorithms: ['HS256']
 		})
 	}
-
 	async validate(payload) {
 		return await this.authService.validate(payload.id)
 	}
