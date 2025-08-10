@@ -1,19 +1,31 @@
 import { Module } from '@nestjs/common'
-import { AppController } from './app.controller'
-import { AppService } from './app.service'
-import { ConfigModule } from '@nestjs/config'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 import { PrismaModule } from './prisma/prisma.module'
-import { AuthModule } from './auth/auth.module';
-
+import { SpotifyModule } from './spotify/spotify.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { getSpofityConfig } from './config/spotify.config';
+import { FileModule } from './file/file.module';
+import { ServeStaticModule } from '@nestjs/serve-static'
+import * as path from 'path'
 @Module({
 	imports: [
 		ConfigModule.forRoot({
-			isGlobal: true
+			isGlobal: true,
 		}),
 		PrismaModule,
-		AuthModule
+		SpotifyModule.forRootAsync({
+			imports: [ConfigModule],
+			useFactory: getSpofityConfig,
+			inject: [ConfigService],
+		}),
+		ServeStaticModule.forRoot({
+			rootPath: path.join(__dirname, '..', 'uploads'),
+			serveRoot: '/api/static',
+		}),
+		FileModule,
 	],
 	controllers: [AppController],
-	providers: [AppService]
+	providers: [AppService],
 })
 export class AppModule {}
